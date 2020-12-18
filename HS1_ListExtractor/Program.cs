@@ -70,7 +70,7 @@ namespace HS1_ListExtractor
                     linetry = line.Remove(3, line.Length - 1).Remove(0, 1);
                 if (line.Contains("m_Name"))
                     m_Name = line.Remove(line.Length - 1, 1).Remove(0,18);
-                if ((line.Contains("m_Script") || Int32.TryParse(linetry, out int j)) && type == "script" && m_Name != "ID TAG" && m_Name != "ID_Tag" && !line.Contains("ID_TA"))
+                if (line.Contains("m_Script") && type == "script" && m_Name != "ID TAG" && m_Name != "ID_Tag" && !line.Contains("ID_TA"))
                 {
                     var m_Script = line.Remove(line.Length - 1, 1).Remove(0, 20);
                     string[] SplitScript = m_Script.Split("\t");
