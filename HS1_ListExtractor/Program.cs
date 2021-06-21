@@ -16,33 +16,36 @@ namespace HS1_ListExtractor
             var ErrorFile = "HoneySelectMods-errors.txt";
             var WorkerDir = "worker";
 
-            var Writer = new StreamWriter(WriterFile, false, Encoding.UTF8);
-            var ErrorWriter = new StreamWriter(ErrorFile, false, Encoding.UTF8);
-            var testWriter = new StreamWriter("test.txt", false, Encoding.UTF8);
-            Writer.AutoFlush = true;
-            ErrorWriter.AutoFlush = true;
-            testWriter.AutoFlush = true;
+            var Writer = new StreamWriter(WriterFile, false, Encoding.UTF8) { AutoFlush = true };
+            var ErrorWriter = new StreamWriter(ErrorFile, false, Encoding.UTF8) { AutoFlush = true };
+            var testWriter = new StreamWriter("test.txt", false, Encoding.UTF8) { AutoFlush = true };
+
             var CurrentDirectory = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
 
             Writer.WriteLine("File;Source;Zip;Cat;ID;NewID;Name;NewName;Type;Remove?;Found IG?");
 
             foreach (var u3dFile in Directory.EnumerateDirectories(WorkerDir, "*list*", SearchOption.AllDirectories))
             {
+
+
+
                 var assetsManager = new AssetsManager();
                 assetsManager.LoadFolder(Path.GetDirectoryName(u3dFile));
                 foreach (var assetFile in assetsManager.assetsFileList)
                 foreach (var asset in assetFile.Objects.Select(x => x.Value))
-                    if (u3dFile.Contains("list"))
-                        switch (asset)
-                        {
-                            case TextAsset textAsset:
-                                var WorkingString = textAsset.Dump();
-                                testWriter.WriteLine(WorkingString);
-                                Letssplit(WorkingString, assetFile.originalPath, "script", Writer, ErrorWriter);
-                                break;
-                            case AssetBundle ab:
-                                break;
-                        }
+                {
+                        if (u3dFile.Contains("list") || assetFile.originalPath.Contains("list"))
+                            switch (asset)
+                            {
+                                case TextAsset textAsset:
+                                    var WorkingString = textAsset.Dump();
+                                    testWriter.WriteLine(WorkingString);
+                                    Letssplit(WorkingString, assetFile.originalPath, "script", Writer, ErrorWriter);
+                                    break;
+                                case AssetBundle ab:
+                                    break;
+                            }
+                }
 
                 assetsManager.Clear();
             }
@@ -69,9 +72,10 @@ namespace HS1_ListExtractor
                 if (line.Contains("m_Script") && type == "script" && m_Name != "ID TAG" && m_Name != "ID_Tag" &&
                     !line.Contains("ID_TA"))
                 {
+                    if (!fileName.Contains("list")) continue;
                     var m_Script = line.Remove(line.Length - 1, 1).Remove(0, 20);
                     var SplitScript = m_Script.Split("\t");
-                    if (SplitScript.Length > 4 && fileName.Contains("list"))
+                    if (SplitScript.GetLength(0) > 4 && fileName.Contains("list"))
                     {
                         try
                         {
@@ -81,8 +85,11 @@ namespace HS1_ListExtractor
                             var CurrentFile = filenameSplit[1];
                             var CurrentID = SplitScript[0];
                             var CurrentName = SplitScript[2];
-                            var CurrentCategory = CurrentID.Substring(0,3);
+                            var CurrentCategory = CurrentID.Substring(0, 3);
                             var currentCategoryText = GetCategoryText(CurrentCategory);
+
+                            // let's check for dupe IDs
+                            // TODO
 
 
                             if (SplitScript[3].ToLower().Contains("unity3d")) // Eye Shadows
@@ -241,6 +248,7 @@ namespace HS1_ListExtractor
                 default:
                     return catNum;
             }
+
             return string.Empty;
         }
     }
