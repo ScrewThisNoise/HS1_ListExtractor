@@ -18,11 +18,13 @@ namespace HS1_ListExtractor
 
             var Writer = new StreamWriter(WriterFile, false, Encoding.UTF8);
             var ErrorWriter = new StreamWriter(ErrorFile, false, Encoding.UTF8);
+            var testWriter = new StreamWriter("test.txt", false, Encoding.UTF8);
             Writer.AutoFlush = true;
             ErrorWriter.AutoFlush = true;
+            testWriter.AutoFlush = true;
             var CurrentDirectory = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
 
-            Writer.WriteLine("File;Path;Source;Zip;Cat;ID;NewID;Name;NewName;Type;Remove?;Found IG?");
+            Writer.WriteLine("File;Source;Zip;Cat;ID;NewID;Name;NewName;Type;Remove?;Found IG?");
 
             foreach (var u3dFile in Directory.EnumerateDirectories(WorkerDir, "*list*", SearchOption.AllDirectories))
             {
@@ -35,6 +37,7 @@ namespace HS1_ListExtractor
                         {
                             case TextAsset textAsset:
                                 var WorkingString = textAsset.Dump();
+                                testWriter.WriteLine(WorkingString);
                                 Letssplit(WorkingString, assetFile.originalPath, "script", Writer, ErrorWriter);
                                 break;
                             case AssetBundle ab:
@@ -46,6 +49,7 @@ namespace HS1_ListExtractor
 
             Writer.Close();
             ErrorWriter.Close();
+            testWriter.Close();
         }
 
         public static void Letssplit(string input, string fileName, string type, StreamWriter Writer,
@@ -60,9 +64,6 @@ namespace HS1_ListExtractor
 
             foreach (var line in result)
             {
-                var linetry = "asd";
-                if (line.Length > 8 && line != "TextAsset Base" && line != "")
-                    linetry = line.Remove(3, line.Length - 1).Remove(0, 1);
                 if (line.Contains("m_Name"))
                     m_Name = line.Remove(line.Length - 1, 1).Remove(0, 18);
                 if (line.Contains("m_Script") && type == "script" && m_Name != "ID TAG" && m_Name != "ID_Tag" &&
@@ -75,15 +76,24 @@ namespace HS1_ListExtractor
                         try
                         {
                             string WorkingStringScript;
+
+                            // Let's make the values more readable
+                            var CurrentFile = filenameSplit[1];
+                            var CurrentID = SplitScript[0];
+                            var CurrentName = SplitScript[2];
+                            var CurrentCategory = CurrentID.Substring(0,3);
+                            var currentCategoryText = GetCategoryText(CurrentCategory);
+
+
                             if (SplitScript[3].ToLower().Contains("unity3d")) // Eye Shadows
                                 WorkingStringScript =
-                                    $"{SplitScript[3].Replace("/", "\\")};{fileName};;{filenameSplit[1]};;{SplitScript[0]};;{SplitScript[2]}";
+                                    $"{SplitScript[3].Replace("/", "\\")};;{CurrentFile};;{CurrentID};;{CurrentName}";
                             else if (SplitScript[2].ToLower().Contains("unity3d")) // Face
                                 WorkingStringScript =
-                                    $"{SplitScript[2].Replace("/", "\\")};{fileName};;{filenameSplit[1]};;{SplitScript[0]};;{SplitScript[2]}";
+                                    $"{SplitScript[2].Replace("/", "\\")};;{CurrentFile};;{CurrentID};;{CurrentName}";
                             else
                                 WorkingStringScript =
-                                    $"{SplitScript[4].Replace("/", "\\")};{fileName};;{filenameSplit[1]};{SplitScript[1]};{SplitScript[0]};;{SplitScript[2]}";
+                                    $"{SplitScript[4].Replace("/", "\\")};;{CurrentFile};{currentCategoryText};{CurrentID};;{CurrentName}";
                             Writer.WriteLine(WorkingStringScript);
                             //File.Delete(fileName);
                         }
@@ -104,6 +114,134 @@ namespace HS1_ListExtractor
                     }
                 }
             }
+        }
+
+        private static string GetCategoryText(string catNum)
+        {
+            // Category translations from HSResilveMoreSlotID
+            string category;
+            switch (catNum)
+            {
+                case "100":
+                    return "Head Type (M)";
+                case "101":
+                    return "Hair (M)";
+                case "102":
+                    return "Normal Top (M)";
+                case "103":
+                    return "Shoes (M)";
+                case "150":
+                    return "Face Type (M)";
+                case "151":
+                    return "Eyebrow (M)";
+                case "152":
+                    return "Eye (M)";
+                case "153":
+                    return "Beard";
+                case "154":
+                    return "Tattoo Face (M)";
+                case "155":
+                    return "Face Wrinkle (M)";
+                case "170":
+                    return "Body Type (M)";
+                case "171":
+                    return "Tattoo Body (M)";
+                case "172":
+                    return "Body Detail (M)";
+                case "200":
+                    return "Head Type (F)";
+                case "201":
+                    return "Hair Back\\Sets";
+                case "202":
+                    return "Hair Front";
+                case "203":
+                    return "Hair Side";
+                case "204":
+                    return "Hair Optional";
+                case "205":
+                    return "Normal Top (F)";
+                case "206":
+                    return "Normal Bottom";
+                case "207":
+                    return "Bra";
+                case "208":
+                    return "Underwear";
+                case "209":
+                    return "Swimsuit";
+                case "210":
+                    return "Swimsuit Top";
+                case "211":
+                    return "Swimsuit Bottom";
+                case "212":
+                    return "Gloves";
+                case "213":
+                    return "Pantyhose";
+                case "214":
+                    return "Socks";
+                case "215":
+                    return "Shoes (F)";
+                case "250":
+                    return "Face Type (F)";
+                case "251":
+                    return "Eyebrow (F)";
+                case "252":
+                    return "Eyelash";
+                case "253":
+                    return "Eye Shadow";
+                case "254":
+                    return "Eye (F)";
+                case "255":
+                    return "Eye Highlight";
+                case "256":
+                    return "Cheek Color";
+                case "257":
+                    return "Lip Type";
+                case "258":
+                    return "Tattoo Face (F)";
+                case "259":
+                    return "Mole";
+                case "260":
+                    return "Face Wrinkle (F)";
+                case "270":
+                    return "Body Type (F)";
+                case "271":
+                    return "Tattoo Body (F)";
+                case "272":
+                    return "Nipple";
+                case "273":
+                    return "Pubes";
+                case "274":
+                    return "Tan (F)";
+                case "275":
+                    return "Body Detail (F)";
+                case "350":
+                    return "Head Accessory";
+                case "351":
+                    return "Ear Accessory";
+                case "352":
+                    return "Glasses Accessory";
+                case "353":
+                    return "Face Accessory";
+                case "354":
+                    return "Neck Accessory";
+                case "355":
+                    return "Shoulder Accessory";
+                case "356":
+                    return "Chest Accessory";
+                case "357":
+                    return "Waist Accessory";
+                case "358":
+                    return "Back Accessory";
+                case "359":
+                    return "Arm Accessory";
+                case "360":
+                    return "Hand Accessory";
+                case "361":
+                    return "Leg Accessory";
+                default:
+                    return catNum;
+            }
+            return string.Empty;
         }
     }
 }
