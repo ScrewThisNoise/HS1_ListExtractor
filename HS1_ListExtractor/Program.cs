@@ -87,10 +87,10 @@ namespace HS1_ListExtractor
 
                             if (SplitScript[3].ToLower().Contains("unity3d")) // Eye Shadows
                                 WorkingStringScript =
-                                    $"{SplitScript[3].Replace("/", "\\")};;{CurrentFile};;{CurrentID};;{CurrentName}";
+                                    $"{SplitScript[3].Replace("/", "\\")};;{CurrentFile};{currentCategoryText};{CurrentID};;{CurrentName}";
                             else if (SplitScript[2].ToLower().Contains("unity3d")) // Face
                                 WorkingStringScript =
-                                    $"{SplitScript[2].Replace("/", "\\")};;{CurrentFile};;{CurrentID};;{CurrentName}";
+                                    $"{SplitScript[2].Replace("/", "\\")};;{CurrentFile};{currentCategoryText};{CurrentID};;{CurrentName}";
                             else
                                 WorkingStringScript =
                                     $"{SplitScript[4].Replace("/", "\\")};;{CurrentFile};{currentCategoryText};{CurrentID};;{CurrentName}";
